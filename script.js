@@ -68,7 +68,7 @@ function escapeHTML(html) {
 
 // Highlight matched code based on severity
 function highlightCode(content, patterns) {
-    let highlightedContent = escapeHTML(content); // Escape HTML first
+    let highlightedContent = escapeHTML(content); // Escape HTML to prevent rendering
     patterns.forEach((pattern) => {
         highlightedContent = highlightedContent.replace(
             pattern.regex,
@@ -116,7 +116,7 @@ fileInput.addEventListener('change', async (event) => {
 
         // Highlight the code and display it
         const highlightedCode = highlightCode(content, vulnerabilityPatterns);
-        codeDisplay.innerHTML = highlightedCode;
+        codeDisplay.innerHTML = highlightedCode; // Inject highlighted content into the Code Display section
     } else {
         resetAnalyzer();
     }
