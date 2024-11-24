@@ -69,32 +69,37 @@ function escapeHTML(html) {
 // Analyze code and capture vulnerabilities
 function analyzeCode(content, patterns) {
     const results = []; // Store details of vulnerabilities
+    const lines = content.split('\n'); // Split content into lines for line-by-line processing
     let highlightedContent = escapeHTML(content); // Start with escaped content
 
     // Iterate through each pattern
     patterns.forEach((pattern) => {
-        const matches = [...highlightedContent.matchAll(pattern.regex)];
-        matches.forEach((match) => {
-            const matchText = match[0]; // Matched text
-            const matchIndex = match.index; // Index of the match
+        lines.forEach((line, lineNumber) => {
+            const matches = [...line.matchAll(pattern.regex)];
+            matches.forEach((match) => {
+                const matchText = match[0]; // Matched text
+                const matchIndex = match.index; // Index of the match in the line
 
-            // Add details to the results array
-            results.push({
-                matchText,
-                message: pattern.message,
-                severity: pattern.severity,
-                position: matchIndex,
+                // Add details to the results array
+                results.push({
+                    matchText,
+                    message: pattern.message,
+                    severity: pattern.severity,
+                    line: lineNumber + 1, // Line number (1-based)
+                    position: matchIndex, // Column position in the line
+                });
+
+                // Highlight the match in the line
+                const escapedMatchText = escapeHTML(matchText); // Ensure matched text is escaped
+                lines[lineNumber] = lines[lineNumber].replace(
+                    matchText,
+                    `<span class="highlight-${pattern.severity}">${escapedMatchText}</span>`
+                );
             });
-
-            // Highlight the match in the code
-            const escapedMatchText = escapeHTML(matchText); // Ensure matched text is escaped
-            highlightedContent = highlightedContent.replace(
-                escapedMatchText,
-                `<span class="highlight-${pattern.severity}">${escapedMatchText}</span>`
-            );
         });
     });
 
+    highlightedContent = lines.join('\n'); // Reassemble the lines
     return { results, highlightedContent };
 }
 
@@ -120,14 +125,14 @@ fileInput.addEventListener('change', async (event) => {
         // Analyze content for vulnerabilities
         const { results, highlightedContent } = analyzeCode(content, vulnerabilityPatterns);
 
-        // Display vulnerabilities
+        // Display vulnerabilities with correlation
         if (results.length > 0) {
             vulnerabilitiesOutput.innerHTML = results
                 .map(
                     (result) =>
                         `&#8226; ${result.message} (Vulnerable code: "<code>${escapeHTML(
                             result.matchText
-                        )}</code>")`
+                        )}</code>", Line: ${result.line}, Column: ${result.position + 1})`
                 )
                 .join('<br>');
         } else {
