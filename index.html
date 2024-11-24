@@ -3,125 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRAV - The Code Analyzer</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            color: #333;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .upload-section {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .upload-section input[type="file"] {
-            display: none;
-        }
-        .upload-section label {
-            background-color: #007bff;
-            color: #fff;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .upload-section label:hover {
-            background-color: #0056b3;
-        }
-        .file-name {
-            margin-top: 10px;
-            font-style: italic;
-        }
-        .vulnerabilities {
-            border: 1px solid #ddd;
-            padding: 10px;
-            border-radius: 5px;
-            min-height: 200px;
-            margin-top: 20px;
-        }
-        .code-display {
-            background-color: #f0f0f0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-            font-family: monospace;
-            overflow-x: auto;
-            white-space: pre-wrap;
-            max-height: 200px;
-            margin-top: 20px;
-        }
-    </style>
+    <title>TRAV - Advanced Code Analyzer</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>TRAV - The Code Analyzer</h1>
+        <h1>TRAV - Advanced Code Analyzer</h1>
         <div class="upload-section">
-            <input type="file" id="fileInput" accept=".py,.html,.css,.pl,.js,.rs,.c,.cpp,.cs">
+            <input type="file" id="fileInput" accept=".py,.html,.css,.pl,.js,.rs,.c,.cpp,.cs,.java,.json">
             <label for="fileInput">Upload Script</label>
             <div class="file-name" id="fileName">No file chosen</div>
         </div>
-        <div class="vulnerabilities">
-            <h2>Code Vulnerabilities</h2>
-            <p id="vulnerabilitiesOutput">No vulnerabilities detected.</p>
+        <div class="analysis-section">
+            <div class="vulnerabilities">
+                <h2>Code Vulnerabilities</h2>
+                <p id="vulnerabilitiesOutput">No vulnerabilities detected.</p>
+            </div>
+            <div class="code-display" id="codeDisplay">Code will appear here.</div>
         </div>
-        <div class="code-display" id="codeDisplay">Code will appear here.</div>
     </div>
-
-    <script>
-        const fileInput = document.getElementById('fileInput');
-        const fileName = document.getElementById('fileName');
-        const vulnerabilitiesOutput = document.getElementById('vulnerabilitiesOutput');
-        const codeDisplay = document.getElementById('codeDisplay');
-
-        const vulnerabilityPatterns = [
-            { regex: /eval\(/g, message: 'Use of eval detected. This can lead to code injection.' },
-            { regex: /innerHTML\s*=/g, message: 'Direct assignment to innerHTML detected. This can lead to XSS vulnerabilities.' },
-            { regex: /password|secret|key|token/gi, message: 'Hardcoded sensitive information detected.' }
-        ];
-
-        fileInput.addEventListener('change', async (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                fileName.textContent = file.name;
-
-                // Read file content
-                const content = await file.text();
-                codeDisplay.textContent = content;
-
-                // Analyze content
-                vulnerabilitiesOutput.textContent = 'Analyzing...';
-                const findings = [];
-                vulnerabilityPatterns.forEach(pattern => {
-                    if (pattern.regex.test(content)) {
-                        findings.push(pattern.message);
-                    }
-                });
-
-                // Display findings
-                if (findings.length > 0) {
-                    vulnerabilitiesOutput.innerHTML = findings.map(f => `&#8226; ${f}`).join('<br>');
-                } else {
-                    vulnerabilitiesOutput.textContent = 'No vulnerabilities detected.';
-                }
-            } else {
-                fileName.textContent = 'No file chosen';
-                vulnerabilitiesOutput.textContent = 'No vulnerabilities detected.';
-                codeDisplay.textContent = 'Code will appear here.';
-            }
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
