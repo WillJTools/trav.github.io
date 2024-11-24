@@ -6,6 +6,10 @@ const removeScriptButton = document.getElementById('removeScript');
 
 // Comprehensive regex patterns
 const vulnerabilityPatterns = [
+    { 
+        regex: /^(?!.*["']use strict["']).*/gm, 
+        message: 'Strict mode missing at the top of JavaScript files. Add "use strict" for safer execution.' 
+    },
     { regex: /eval\(/g, message: 'Use of eval detected. This can lead to code injection.' },
     { regex: /innerHTML\s*=/g, message: 'Direct assignment to innerHTML detected. This can lead to XSS vulnerabilities.' },
     { regex: /password|secret|key|token/gi, message: 'Hardcoded sensitive information detected.' },
@@ -350,77 +354,98 @@ const vulnerabilityPatterns = [
     { regex: /navigator\.clipboard/g, message: 'Clipboard API detected. Handle clipboard data securely.' }
 ];
 
-// Escape HTML
-function escapeHTML(content) {
-  return content
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+
+// Escape HTML to prevent rendering of the uploaded code
+function escapeHTML(html) {
+    return html
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
 
-// Analyze Code
-function analyzeCode(content) {
-  const lines = content.split('\n');
-  const vulnerabilities = [];
-  const highlightedLines = lines.map((line, lineNumber) => {
-    let processedLine = escapeHTML(line);
-    vulnerabilityPatterns.forEach((pattern) => {
-      const matches = [...line.matchAll(pattern.regex)];
-      matches.forEach((match) => {
-        vulnerabilities.push({
-          message: pattern.message,
-          severity: pattern.severity,
-          line: lineNumber + 1,
-          match: match[0],
+// Process code and return highlighted output
+function processCode(content, patterns) {
+    const lines = content.split('\n'); // Split the code into lines
+    const vulnerabilities = []; // Capture details of all vulnerabilities
+    const formattedLines = lines.map((line, lineNumber) => {
+        let processedLine = escapeHTML(line); // Start with escaped content
+        patterns.forEach((pattern) => {
+            let matches = content.match(pattern.regex);
+            
+            // Special case: strict mode should only be checked in the first few lines
+            if (pattern.message.includes("Strict mode missing")) {
+                matches = lines.slice(0, 5).join('\n').match(pattern.regex);
+            }
+
+            if (matches) {
+                matches.forEach((match) => {
+                    const escapedMatchText = escapeHTML(match);
+                    const highlightSpan = `<span class="highlight">${escapedMatchText}</span>`;
+
+                    // Replace the match in the line with the highlighted span
+                    processedLine = processedLine.replace(escapedMatchText, highlightSpan);
+
+                    // Store vulnerability details
+                    vulnerabilities.push({
+                        message: pattern.message,
+                        matchText: match,
+                        line: lineNumber + 1,
+                    });
+                });
+            }
         });
-        processedLine = processedLine.replace(
-          match[0],
-          `<span class="highlight-${pattern.severity}">${match[0]}</span>`
-        );
-      });
+        return processedLine; // Return the highlighted line
     });
-    return `<span class="line-number">${lineNumber + 1}</span>${processedLine}`;
-  });
-  return { vulnerabilities, highlightedLines };
+
+    return { vulnerabilities, formattedLines };
 }
 
-// Render Vulnerabilities
-function renderVulnerabilities(vulnerabilities) {
-  vulnerabilitiesOutput.innerHTML = vulnerabilities
-    .map(
-      (vuln) =>
-        `<p><span class="severity-indicator ${vuln.severity}"></span> ${vuln.message} (Line: ${vuln.line})</p>`
-    )
-    .join('');
+// Reset the analyzer to its default state
+function resetAnalyzer() {
+    fileName.textContent = 'No file chosen';
+    vulnerabilitiesOutput.textContent = 'No vulnerabilities detected.';
+    codeDisplay.innerHTML = '<p>Code will appear here.</p>'; // Reset display
+    removeScriptButton.hidden = true;
+    fileInput.value = '';
 }
 
-// Render Code
-function renderCode(lines) {
-  codeDisplay.innerHTML = lines.join('<br>');
-}
-
-// Reset UI
-function resetUI() {
-  fileName.textContent = 'No file chosen';
-  vulnerabilitiesOutput.innerHTML = '<p>No vulnerabilities detected.</p>';
-  codeDisplay.innerHTML = '<p>Code will appear here.</p>';
-  removeScriptButton.hidden = true;
-}
-
-// Handle File Upload
+// Handle file uploads
 fileInput.addEventListener('change', async (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    fileName.textContent = file.name;
-    const content = await file.text();
-    const { vulnerabilities, highlightedLines } = analyzeCode(content);
-    renderVulnerabilities(vulnerabilities);
-    renderCode(highlightedLines);
-    removeScriptButton.hidden = false;
-  }
+    const file = event.target.files[0];
+    if (file) {
+        fileName.textContent = file.name;
+        removeScriptButton.hidden = false;
+
+        // Read the file content
+        const content = await file.text();
+
+        // Process the code for vulnerabilities
+        const { vulnerabilities, formattedLines } = processCode(content, vulnerabilityPatterns);
+
+        // Display vulnerabilities
+        if (vulnerabilities.length > 0) {
+            vulnerabilitiesOutput.innerHTML = vulnerabilities
+                .map(
+                    (vuln) =>
+                        `&#8226; ${vuln.message} (Vulnerable code: "<code>${escapeHTML(
+                            vuln.matchText
+                        )}</code>", Line: ${vuln.line})`
+                )
+                .join('<br>');
+        } else {
+            vulnerabilitiesOutput.textContent = 'No vulnerabilities detected.';
+        }
+
+        // Render the formatted code in the Code Display section
+        codeDisplay.innerHTML = formattedLines
+            .map((line, index) => `<div class="code-line"><span class="line-number">${index + 1}</span> ${line}</div>`)
+            .join('');
+    } else {
+        resetAnalyzer();
+    }
 });
 
-// Handle Reset
-removeScriptButton.addEventListener('click', resetUI);
+// Handle script removal
+removeScriptButton.addEventListener('click', () => resetAnalyzer());
