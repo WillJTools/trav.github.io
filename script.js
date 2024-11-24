@@ -6,10 +6,7 @@ const removeScriptButton = document.getElementById('removeScript');
 
 // Comprehensive regex patterns
 const vulnerabilityPatterns = [
-    { 
-        regex: /^(?!.*["']use strict["']).*/gm, 
-        message: 'Strict mode missing at the top of JavaScript files. Add "use strict" for safer execution.' 
-    },
+    
     { regex: /eval\(/g, message: 'Use of eval detected. This can lead to code injection.' },
     { regex: /innerHTML\s*=/g, message: 'Direct assignment to innerHTML detected. This can lead to XSS vulnerabilities.' },
     { regex: /password|secret|key|token/gi, message: 'Hardcoded sensitive information detected.' },
