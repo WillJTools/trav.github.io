@@ -361,37 +361,42 @@ function escapeHTML(html) {
         .replace(/'/g, '&#039;');
 }
 
-// Process code and return highlighted output
-function processCode(content, patterns) {
+// Determine file type from extension
+function getFileType(fileName) {
+    const extension = fileName.split('.').pop().toLowerCase();
+    return extension;
+}
+
+// Process code and return vulnerabilities
+function processCode(content, fileType, patterns) {
     const lines = content.split('\n'); // Split the code into lines
     const vulnerabilities = []; // Capture details of all vulnerabilities
     const formattedLines = lines.map((line, lineNumber) => {
         let processedLine = escapeHTML(line); // Start with escaped content
+
         patterns.forEach((pattern) => {
-            let matches = content.match(pattern.regex);
-            
-            // Special case: strict mode should only be checked in the first few lines
-            if (pattern.message.includes("Strict mode missing")) {
-                matches = lines.slice(0, 5).join('\n').match(pattern.regex);
-            }
+            let matches = line.match(pattern.regex);
 
             if (matches) {
                 matches.forEach((match) => {
                     const escapedMatchText = escapeHTML(match);
                     const highlightSpan = `<span class="highlight">${escapedMatchText}</span>`;
-
+                    
                     // Replace the match in the line with the highlighted span
                     processedLine = processedLine.replace(escapedMatchText, highlightSpan);
 
-                    // Store vulnerability details
-                    vulnerabilities.push({
-                        message: pattern.message,
-                        matchText: match,
-                        line: lineNumber + 1,
-                    });
+                    // Add to vulnerabilities if not a duplicate
+                    if (!vulnerabilities.some(v => v.message === pattern.message && v.line === lineNumber + 1)) {
+                        vulnerabilities.push({
+                            message: pattern.message,
+                            matchText: match,
+                            line: lineNumber + 1,
+                        });
+                    }
                 });
             }
         });
+
         return processedLine; // Return the highlighted line
     });
 
@@ -411,6 +416,7 @@ function resetAnalyzer() {
 fileInput.addEventListener('change', async (event) => {
     const file = event.target.files[0];
     if (file) {
+        const fileType = getFileType(file.name);
         fileName.textContent = file.name;
         removeScriptButton.hidden = false;
 
@@ -418,7 +424,7 @@ fileInput.addEventListener('change', async (event) => {
         const content = await file.text();
 
         // Process the code for vulnerabilities
-        const { vulnerabilities, formattedLines } = processCode(content, vulnerabilityPatterns);
+        const { vulnerabilities, formattedLines } = processCode(content, fileType, vulnerabilityPatterns);
 
         // Display vulnerabilities
         if (vulnerabilities.length > 0) {
