@@ -70,36 +70,32 @@ function escapeHTML(html) {
 function analyzeCode(content, patterns) {
     const results = []; // Store details of vulnerabilities
     const lines = content.split('\n'); // Split content into lines for line-by-line processing
-    let highlightedContent = escapeHTML(content); // Start with escaped content
-
-    // Iterate through each pattern
-    patterns.forEach((pattern) => {
-        lines.forEach((line, lineNumber) => {
-            const matches = [...line.matchAll(pattern.regex)];
+    const highlightedLines = lines.map((line, lineNumber) => {
+        let processedLine = escapeHTML(line); // Start with escaped line content
+        patterns.forEach((pattern) => {
+            const matches = [...processedLine.matchAll(pattern.regex)];
             matches.forEach((match) => {
-                const matchText = match[0]; // Matched text
-                const matchIndex = match.index; // Index of the match in the line
+                const matchText = match[0];
+                const escapedMatchText = escapeHTML(matchText);
+                const highlightSpan = `<span class="highlight-${pattern.severity}">${escapedMatchText}</span>`;
 
-                // Add details to the results array
+                // Highlight match within the line
+                processedLine = processedLine.replace(escapedMatchText, highlightSpan);
+
+                // Add to results for the vulnerabilities section
                 results.push({
                     matchText,
                     message: pattern.message,
                     severity: pattern.severity,
-                    line: lineNumber + 1, // Line number (1-based)
-                    position: matchIndex, // Column position in the line
+                    line: lineNumber + 1,
+                    position: match.index,
                 });
-
-                // Highlight the match in the line
-                const escapedMatchText = escapeHTML(matchText); // Ensure matched text is escaped
-                lines[lineNumber] = lines[lineNumber].replace(
-                    matchText,
-                    `<span class="highlight-${pattern.severity}">${escapedMatchText}</span>`
-                );
             });
         });
+        return processedLine;
     });
 
-    highlightedContent = lines.join('\n'); // Reassemble the lines
+    const highlightedContent = highlightedLines.join('\n'); // Reassemble the lines
     return { results, highlightedContent };
 }
 
