@@ -67,7 +67,6 @@ const vulnerabilityPatterns = [
     { regex: /CSP\.sandbox/g, message: 'CSP sandbox directive detected. Ensure secure sandbox policies are applied.' },
     { regex: /@babel\/polyfill/g, message: 'Babel polyfill detected. Remove unused polyfills for smaller, faster builds.' },
     { regex: /crypto\.createHash\(['"]sha256['"]\)\.update\(['"].*['"]\)\.digest/g, message: 'Hardcoded data in hash functions detected. Avoid exposing sensitive data in hashes.' },
-    { regex: /(?<!['"]use strict['"])/g, message: 'Strict mode missing in JavaScript files. Enforce strict mode for safer execution.' },
     { regex: /Object\.create\(\s*null\s*\)/g, message: 'Object.create(null) detected. Avoid creating objects without prototypes unless necessary.' },
     { regex: /\/\*\s*@ts-ignore/g, message: 'TypeScript ignore directive detected. Ensure it does not bypass important type checks.' },
     { regex: /requestAnimationFrame\(.+\)/g, message: 'Improper usage of requestAnimationFrame detected. Validate animation logic.' },
