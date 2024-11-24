@@ -9,11 +9,23 @@
 <body>
     <div class="container">
         <h1>TRAV - Advanced Code Analyzer</h1>
+        
+        <!-- Color-Coding Legend -->
+        <div class="legend">
+            <p><span class="high-severity"></span> High Severity</p>
+            <p><span class="medium-severity"></span> Medium Severity</p>
+            <p><span class="low-severity"></span> Low Severity</p>
+        </div>
+
+        <!-- Upload Section -->
         <div class="upload-section">
             <input type="file" id="fileInput" accept=".py,.html,.css,.pl,.js,.rs,.c,.cpp,.cs,.java,.json">
             <label for="fileInput">Upload Script</label>
             <div class="file-name" id="fileName">No file chosen</div>
+            <button id="removeScript" hidden>Remove Script</button>
         </div>
+
+        <!-- Analysis Section -->
         <div class="analysis-section">
             <div class="vulnerabilities">
                 <h2>Code Vulnerabilities</h2>
