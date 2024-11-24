@@ -66,7 +66,30 @@ function escapeHTML(html) {
         .replace(/'/g, '&#039;');
 }
 
-// Process code and return highlighted output
+// Map severity levels to CSS classes
+const severityColors = {
+    high: 'high-severity',
+    medium: 'medium-severity',
+    low: 'low-severity',
+};
+
+// Format vulnerabilities for the vulnerabilities section
+function formatVulnerabilityOutput(vulnerabilities) {
+    return vulnerabilities
+        .map((vuln) => {
+            const severityClass = severityColors[vuln.severity]; // Map severity to CSS class
+            return `
+                <div class="vulnerability-item">
+                    <span class="severity-indicator ${severityClass}"></span>
+                    ${vuln.message} 
+                    (Vulnerable code: "<code>${escapeHTML(vuln.matchText)}</code>", Line: ${vuln.line})
+                </div>
+            `;
+        })
+        .join('');
+}
+
+// Process code and return vulnerabilities and formatted lines
 function processCode(content, patterns) {
     const lines = content.split('\n'); // Split the code into lines
     const vulnerabilities = []; // Capture details of all vulnerabilities
@@ -119,16 +142,9 @@ fileInput.addEventListener('change', async (event) => {
         // Process the code for vulnerabilities
         const { vulnerabilities, formattedLines } = processCode(content, vulnerabilityPatterns);
 
-        // Display vulnerabilities
+        // Render vulnerabilities with severity indicators
         if (vulnerabilities.length > 0) {
-            vulnerabilitiesOutput.innerHTML = vulnerabilities
-                .map(
-                    (vuln) =>
-                        `&#8226; ${vuln.message} (Vulnerable code: "<code>${escapeHTML(
-                            vuln.matchText
-                        )}</code>", Line: ${vuln.line})`
-                )
-                .join('<br>');
+            vulnerabilitiesOutput.innerHTML = formatVulnerabilityOutput(vulnerabilities);
         } else {
             vulnerabilitiesOutput.textContent = 'No vulnerabilities detected.';
         }
