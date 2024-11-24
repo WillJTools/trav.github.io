@@ -2,6 +2,7 @@ const fileInput = document.getElementById('fileInput');
 const fileName = document.getElementById('fileName');
 const vulnerabilitiesOutput = document.getElementById('vulnerabilitiesOutput');
 const codeDisplay = document.getElementById('codeDisplay');
+const removeScriptButton = document.getElementById('removeScript');
 
 // Comprehensive regex patterns
 const vulnerabilityPatterns = [
@@ -60,29 +61,43 @@ fileInput.addEventListener('change', async (event) => {
     const file = event.target.files[0];
     if (file) {
         fileName.textContent = file.name;
+        removeScriptButton.hidden = false;
 
-        // Read file content
         const content = await file.text();
         codeDisplay.textContent = content;
 
-        // Analyze content
         vulnerabilitiesOutput.textContent = 'Analyzing...';
         const findings = [];
-        vulnerabilityPatterns.forEach(pattern => {
+        let highlightedCode = content;
+
+        vulnerabilityPatterns.forEach((pattern) => {
             if (pattern.regex.test(content)) {
                 findings.push(pattern.message);
+                highlightedCode = highlightedCode.replace(
+                    pattern.regex,
+                    `<span class="highlight-${pattern.severity}">$&</span>`
+                );
             }
         });
 
-        // Display findings
         if (findings.length > 0) {
-            vulnerabilitiesOutput.innerHTML = findings.map(f => `&#8226; ${f}`).join('<br>');
+            vulnerabilitiesOutput.innerHTML = findings.map((f) => `&#8226; ${f}`).join('<br>');
         } else {
             vulnerabilitiesOutput.textContent = 'No vulnerabilities detected.';
         }
+
+        codeDisplay.innerHTML = highlightedCode;
     } else {
-        fileName.textContent = 'No file chosen';
-        vulnerabilitiesOutput.textContent = 'No vulnerabilities detected.';
-        codeDisplay.textContent = 'Code will appear here.';
+        resetAnalyzer();
     }
 });
+
+removeScriptButton.addEventListener('click', () => resetAnalyzer());
+
+function resetAnalyzer() {
+    fileName.textContent = 'No file chosen';
+    vulnerabilitiesOutput.textContent = 'No vulnerabilities detected.';
+    codeDisplay.textContent = 'Code will appear here.';
+    removeScriptButton.hidden = true;
+    fileInput.value = '';
+}
