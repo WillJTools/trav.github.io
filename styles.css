@@ -156,6 +156,13 @@ h1 {
     position: relative;
 }
 
+.code-display pre {
+    font-family: monospace;
+    color: #333;
+    white-space: pre-wrap; /* Preserve line breaks */
+    word-wrap: break-word; /* Handle long lines */
+}
+
 .code-display span {
     font-weight: bold;
 }
@@ -183,21 +190,6 @@ h1 {
     font-weight: bold;
     border-radius: 3px;
     padding: 0 2px;
-}
-
-/* Code Display Styles */
-.code-display {
-    background-color: #f0f0f0;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 15px;
-    font-family: monospace;
-    overflow-x: auto;
-    white-space: pre-wrap;
-    max-height: 50vh;
-    width: 100%;
-    color: #333;
-    position: relative;
 }
 
 /* Responsiveness */
