@@ -68,7 +68,7 @@ function escapeHTML(html) {
 
 // Highlight matched code based on severity
 function highlightCode(content, patterns) {
-    let highlightedContent = escapeHTML(content); // Escape HTML to prevent rendering
+    let highlightedContent = escapeHTML(content); // Escape HTML to avoid rendering issues
     patterns.forEach((pattern) => {
         highlightedContent = highlightedContent.replace(
             pattern.regex,
@@ -82,8 +82,7 @@ function highlightCode(content, patterns) {
 function resetAnalyzer() {
     fileName.textContent = 'No file chosen';
     vulnerabilitiesOutput.textContent = 'No vulnerabilities detected.';
-    codeDisplay.textContent = 'Code will appear here.';
-    codeDisplay.innerHTML = ''; // Clear highlighted content
+    codeDisplay.innerHTML = '<p>Code will appear here.</p>'; // Reset display
     removeScriptButton.hidden = true;
     fileInput.value = '';
 }
@@ -116,7 +115,7 @@ fileInput.addEventListener('change', async (event) => {
 
         // Highlight the code and display it
         const highlightedCode = highlightCode(content, vulnerabilityPatterns);
-        codeDisplay.innerHTML = highlightedCode; // Inject highlighted content into the Code Display section
+        codeDisplay.innerHTML = `<pre>${highlightedCode}</pre>`; // Wrap in <pre> for formatting
     } else {
         resetAnalyzer();
     }
