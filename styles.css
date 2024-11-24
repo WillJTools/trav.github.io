@@ -4,11 +4,15 @@ body {
     color: #333;
     margin: 0;
     padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
 }
 
 .container {
-    max-width: 1200px;
-    margin: 0 auto;
+    max-width: 900px;
+    width: 100%;
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
@@ -21,7 +25,41 @@ body {
 
 h1 {
     text-align: center;
-    margin-bottom: 20px;
+}
+
+.legend {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.legend p {
+    margin: 0;
+    font-size: 14px;
+}
+
+.legend span {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 5px;
+    border-radius: 50%;
+}
+
+.high-severity {
+    background-color: red;
+}
+
+.medium-severity {
+    background-color: orange;
+}
+
+.low-severity {
+    background-color: yellow;
 }
 
 .upload-section {
@@ -29,6 +67,7 @@ h1 {
     flex-direction: column;
     align-items: center;
     gap: 10px;
+    width: 100%;
 }
 
 .upload-section input[type="file"] {
@@ -52,6 +91,19 @@ h1 {
     margin-top: 10px;
     font-style: italic;
     color: #666;
+}
+
+#removeScript {
+    background-color: #ff4d4d;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#removeScript:hover {
+    background-color: #cc0000;
 }
 
 .analysis-section {
@@ -80,8 +132,17 @@ h1 {
     white-space: pre-wrap;
     max-height: 400px;
     width: 100%;
+    color: #333;
 }
 
-.vulnerabilities-output {
-    color: red;
+.highlight-high {
+    background-color: rgba(255, 0, 0, 0.3);
+}
+
+.highlight-medium {
+    background-color: rgba(255, 165, 0, 0.3);
+}
+
+.highlight-low {
+    background-color: rgba(255, 255, 0, 0.3);
 }
