@@ -1,3 +1,4 @@
+/* General Styles */
 body {
     font-family: Arial, sans-serif;
     background-color: #f5f5f5;
@@ -25,8 +26,10 @@ body {
 
 h1 {
     text-align: center;
+    font-size: 1.8rem;
 }
 
+/* Color-Coding Legend */
 .legend {
     display: flex;
     justify-content: space-around;
@@ -40,13 +43,15 @@ h1 {
 .legend p {
     margin: 0;
     font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .legend span {
     display: inline-block;
     width: 12px;
     height: 12px;
-    margin-right: 5px;
     border-radius: 50%;
 }
 
@@ -62,6 +67,7 @@ h1 {
     background-color: yellow;
 }
 
+/* Upload Section */
 .upload-section {
     display: flex;
     flex-direction: column;
@@ -81,6 +87,7 @@ h1 {
     border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
+    text-align: center;
 }
 
 .upload-section label:hover {
@@ -100,12 +107,15 @@ h1 {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    font-size: 16px;
+    text-align: center;
 }
 
 #removeScript:hover {
     background-color: #cc0000;
 }
 
+/* Analysis Section */
 .analysis-section {
     display: flex;
     flex-direction: column;
@@ -120,8 +130,16 @@ h1 {
     padding: 15px;
     border-radius: 5px;
     background-color: #f9f9f9;
+    font-size: 14px;
+    color: #333;
 }
 
+.vulnerabilities p {
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Code Display Section */
 .code-display {
     background-color: #f0f0f0;
     border: 1px solid #ddd;
@@ -133,16 +151,61 @@ h1 {
     max-height: 400px;
     width: 100%;
     color: #333;
+    position: relative;
 }
 
+.code-display span {
+    font-weight: bold;
+}
+
+/* Highlighting Styles */
 .highlight-high {
-    background-color: rgba(255, 0, 0, 0.3);
+    background-color: rgba(255, 0, 0, 0.2);
+    color: #a70000;
+    font-weight: bold;
+    border-radius: 3px;
+    padding: 0 2px;
 }
 
 .highlight-medium {
-    background-color: rgba(255, 165, 0, 0.3);
+    background-color: rgba(255, 165, 0, 0.2);
+    color: #a86700;
+    font-weight: bold;
+    border-radius: 3px;
+    padding: 0 2px;
 }
 
 .highlight-low {
-    background-color: rgba(255, 255, 0, 0.3);
+    background-color: rgba(255, 255, 0, 0.2);
+    color: #666600;
+    font-weight: bold;
+    border-radius: 3px;
+    padding: 0 2px;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    .container {
+        padding: 15px;
+    }
+
+    .upload-section label,
+    #removeScript {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+
+    .vulnerabilities {
+        padding: 10px;
+        font-size: 13px;
+    }
+
+    .code-display {
+        font-size: 13px;
+        padding: 10px;
+    }
 }
