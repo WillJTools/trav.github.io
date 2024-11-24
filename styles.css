@@ -185,6 +185,21 @@ h1 {
     padding: 0 2px;
 }
 
+/* Code Display Styles */
+.code-display {
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    font-family: monospace;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    max-height: 50vh;
+    width: 100%;
+    color: #333;
+    position: relative;
+}
+
 /* Responsiveness */
 @media (max-width: 768px) {
     h1 {
