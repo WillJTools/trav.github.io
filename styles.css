@@ -126,6 +126,7 @@ h1 {
     gap: 20px;
 }
 
+/* Vulnerabilities Section */
 .vulnerabilities {
     width: 100%;
     border: 1px solid #ddd;
@@ -134,11 +135,40 @@ h1 {
     background-color: #f9f9f9;
     font-size: 14px;
     color: #333;
+    line-height: 1.5;
+}
+
+.vulnerability-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+    padding: 5px 0;
+}
+
+.severity-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+/* Severity Indicators */
+.high-severity {
+    background-color: red;
+}
+
+.medium-severity {
+    background-color: orange;
+}
+
+.low-severity {
+    background-color: yellow;
 }
 
 .vulnerabilities p {
     margin: 0;
-    line-height: 1.5;
 }
 
 /* Code Display Section */
@@ -218,5 +248,10 @@ h1 {
     .code-display {
         font-size: 13px;
         padding: 10px;
+    }
+
+    .vulnerability-item {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }
