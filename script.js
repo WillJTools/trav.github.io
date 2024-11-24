@@ -56,48 +56,71 @@ const vulnerabilityPatterns = [
     { regex: /navigator\.clipboard/g, message: 'Clipboard API detected. Handle clipboard data securely.' }
 ];
 
-// File upload handler
+// Escape HTML to prevent rendering of the uploaded code
+function escapeHTML(html) {
+    return html
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+// Highlight matched code based on severity
+function highlightCode(content, patterns) {
+    let highlightedContent = escapeHTML(content); // Escape HTML first
+    patterns.forEach((pattern) => {
+        highlightedContent = highlightedContent.replace(
+            pattern.regex,
+            (match) => `<span class="highlight-${pattern.severity}">${match}</span>`
+        );
+    });
+    return highlightedContent;
+}
+
+// Reset the analyzer to its default state
+function resetAnalyzer() {
+    fileName.textContent = 'No file chosen';
+    vulnerabilitiesOutput.textContent = 'No vulnerabilities detected.';
+    codeDisplay.textContent = 'Code will appear here.';
+    codeDisplay.innerHTML = ''; // Clear highlighted content
+    removeScriptButton.hidden = true;
+    fileInput.value = '';
+}
+
+// Handle file uploads
 fileInput.addEventListener('change', async (event) => {
     const file = event.target.files[0];
     if (file) {
         fileName.textContent = file.name;
         removeScriptButton.hidden = false;
 
+        // Read the file content
         const content = await file.text();
-        codeDisplay.textContent = content;
 
+        // Analyze content for vulnerabilities
         vulnerabilitiesOutput.textContent = 'Analyzing...';
         const findings = [];
-        let highlightedCode = content;
-
         vulnerabilityPatterns.forEach((pattern) => {
             if (pattern.regex.test(content)) {
                 findings.push(pattern.message);
-                highlightedCode = highlightedCode.replace(
-                    pattern.regex,
-                    `<span class="highlight-${pattern.severity}">$&</span>`
-                );
             }
         });
 
+        // Display vulnerabilities
         if (findings.length > 0) {
             vulnerabilitiesOutput.innerHTML = findings.map((f) => `&#8226; ${f}`).join('<br>');
         } else {
             vulnerabilitiesOutput.textContent = 'No vulnerabilities detected.';
         }
 
+        // Highlight the code and display it
+        const highlightedCode = highlightCode(content, vulnerabilityPatterns);
         codeDisplay.innerHTML = highlightedCode;
     } else {
         resetAnalyzer();
     }
 });
 
+// Handle script removal
 removeScriptButton.addEventListener('click', () => resetAnalyzer());
-
-function resetAnalyzer() {
-    fileName.textContent = 'No file chosen';
-    vulnerabilitiesOutput.textContent = 'No vulnerabilities detected.';
-    codeDisplay.textContent = 'Code will appear here.';
-    removeScriptButton.hidden = true;
-    fileInput.value = '';
-}
