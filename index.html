@@ -1,40 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRAV - Advanced Code Analyzer</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TRAV - Advanced Code Analyzer</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>TRAV - Advanced Code Analyzer</h1>
-        
-        <!-- Color-Coding Legend -->
-        <div class="legend">
-            <p><span class="high-severity"></span> High Severity</p>
-            <p><span class="medium-severity"></span> Medium Severity</p>
-            <p><span class="low-severity"></span> Low Severity</p>
-        </div>
+  <div class="container">
+    <h1>TRAV - Advanced Code Analyzer</h1>
 
-        <!-- Upload Section -->
-        <div class="upload-section">
-            <input type="file" id="fileInput" accept=".py,.html,.css,.pl,.js,.rs,.c,.cpp,.cs,.java,.json">
-            <label for="fileInput">Upload Script</label>
-            <div class="file-name" id="fileName">No file chosen</div>
-            <button id="removeScript" hidden>Remove Script</button>
-        </div>
-
-        <!-- Analysis Section -->
-        <div class="analysis-section">
-            <div class="vulnerabilities">
-                <h2>Code Vulnerabilities</h2>
-                <p id="vulnerabilitiesOutput">No vulnerabilities detected.</p>
-            </div>
-            <div class="code-display" id="codeDisplay">Code will appear here.</div>
-        </div>
+    <!-- Color-Coding Legend -->
+    <div class="legend">
+      <p><span class="severity-indicator high"></span> High Severity</p>
+      <p><span class="severity-indicator medium"></span> Medium Severity</p>
+      <p><span class="severity-indicator low"></span> Low Severity</p>
     </div>
-    <!-- Ensure the script is loaded after the DOM -->
-    <script src="script.js"></script>
+
+    <!-- Upload Section -->
+    <div class="upload-section">
+      <input type="file" id="fileInput" accept=".py,.html,.css,.js,.java,.c,.cpp">
+      <label for="fileInput" class="button">Upload Script</label>
+      <div id="fileName" class="file-name">No file chosen</div>
+      <button id="removeScript" hidden class="button danger">Remove Script</button>
+    </div>
+
+    <!-- Analysis Section -->
+    <div class="analysis-section">
+      <div id="vulnerabilitiesOutput" class="vulnerabilities">
+        <h2>Code Vulnerabilities</h2>
+        <p>No vulnerabilities detected.</p>
+      </div>
+      <div id="codeDisplay" class="code-display">
+        <p>Code will appear here.</p>
+      </div>
+    </div>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
