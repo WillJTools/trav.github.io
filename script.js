@@ -56,7 +56,7 @@ const vulnerabilityPatterns = [
     { regex: /navigator\.clipboard/g, message: 'Clipboard API detected. Handle clipboard data securely.' }
 ];
 
-// Escape HTML to prevent rendering of the uploaded code
+// Escape HTML to prevent rendering of uploaded code
 function escapeHTML(html) {
     return html
         .replace(/&/g, '&amp;')
@@ -66,37 +66,35 @@ function escapeHTML(html) {
         .replace(/'/g, '&#039;');
 }
 
-// Analyze code and capture vulnerabilities
-function analyzeCode(content, patterns) {
-    const results = []; // Store details of vulnerabilities
-    const lines = content.split('\n'); // Split content into lines for line-by-line processing
-    const highlightedLines = lines.map((line, lineNumber) => {
-        let processedLine = escapeHTML(line); // Start with escaped line content
+// Process code and return highlighted output
+function processCode(content, patterns) {
+    const lines = content.split('\n'); // Split the code into lines
+    const vulnerabilities = []; // Capture details of all vulnerabilities
+    const formattedLines = lines.map((line, lineNumber) => {
+        let processedLine = escapeHTML(line); // Start with escaped content
         patterns.forEach((pattern) => {
-            const matches = [...processedLine.matchAll(pattern.regex)];
+            const matches = [...line.matchAll(pattern.regex)];
             matches.forEach((match) => {
                 const matchText = match[0];
                 const escapedMatchText = escapeHTML(matchText);
                 const highlightSpan = `<span class="highlight-${pattern.severity}">${escapedMatchText}</span>`;
 
-                // Highlight match within the line
+                // Replace the match in the line with the highlighted span
                 processedLine = processedLine.replace(escapedMatchText, highlightSpan);
 
-                // Add to results for the vulnerabilities section
-                results.push({
+                // Store vulnerability details
+                vulnerabilities.push({
                     matchText,
                     message: pattern.message,
                     severity: pattern.severity,
                     line: lineNumber + 1,
-                    position: match.index,
                 });
             });
         });
-        return processedLine;
+        return processedLine; // Return the highlighted line
     });
 
-    const highlightedContent = highlightedLines.join('\n'); // Reassemble the lines
-    return { results, highlightedContent };
+    return { vulnerabilities, formattedLines };
 }
 
 // Reset the analyzer to its default state
@@ -118,25 +116,27 @@ fileInput.addEventListener('change', async (event) => {
         // Read the file content
         const content = await file.text();
 
-        // Analyze content for vulnerabilities
-        const { results, highlightedContent } = analyzeCode(content, vulnerabilityPatterns);
+        // Process the code for vulnerabilities
+        const { vulnerabilities, formattedLines } = processCode(content, vulnerabilityPatterns);
 
-        // Display vulnerabilities with correlation
-        if (results.length > 0) {
-            vulnerabilitiesOutput.innerHTML = results
+        // Display vulnerabilities
+        if (vulnerabilities.length > 0) {
+            vulnerabilitiesOutput.innerHTML = vulnerabilities
                 .map(
-                    (result) =>
-                        `&#8226; ${result.message} (Vulnerable code: "<code>${escapeHTML(
-                            result.matchText
-                        )}</code>", Line: ${result.line}, Column: ${result.position + 1})`
+                    (vuln) =>
+                        `&#8226; ${vuln.message} (Vulnerable code: "<code>${escapeHTML(
+                            vuln.matchText
+                        )}</code>", Line: ${vuln.line})`
                 )
                 .join('<br>');
         } else {
             vulnerabilitiesOutput.textContent = 'No vulnerabilities detected.';
         }
 
-        // Display highlighted code in the Code Display section
-        codeDisplay.innerHTML = `<pre><code>${highlightedContent}</code></pre>`; // Wrap in <pre> and <code>
+        // Render the formatted code in the Code Display section
+        codeDisplay.innerHTML = formattedLines
+            .map((line, index) => `<div class="code-line"><span class="line-number">${index + 1}</span> ${line}</div>`)
+            .join('');
     } else {
         resetAnalyzer();
     }
