@@ -56,107 +56,77 @@ const vulnerabilityPatterns = [
     { regex: /navigator\.clipboard/g, message: 'Clipboard API detected. Handle clipboard data securely.' }
 ];
 
-// Escape HTML to prevent rendering of uploaded code
-function escapeHTML(html) {
-    return html
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+// Escape HTML
+function escapeHTML(content) {
+  return content
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
-// Map severity levels to CSS classes
-const severityColors = {
-    high: 'high-severity',
-    medium: 'medium-severity',
-    low: 'low-severity',
-};
-
-// Format vulnerabilities for the vulnerabilities section
-function formatVulnerabilityOutput(vulnerabilities) {
-    return vulnerabilities
-        .map((vuln) => {
-            const severityClass = severityColors[vuln.severity]; // Map severity to CSS class
-            return `
-                <div class="vulnerability-item">
-                    <span class="severity-indicator ${severityClass}"></span>
-                    ${vuln.message} 
-                    (Vulnerable code: "<code>${escapeHTML(vuln.matchText)}</code>", Line: ${vuln.line})
-                </div>
-            `;
-        })
-        .join('');
-}
-
-// Process code and return vulnerabilities and formatted lines
-function processCode(content, patterns) {
-    const lines = content.split('\n'); // Split the code into lines
-    const vulnerabilities = []; // Capture details of all vulnerabilities
-    const formattedLines = lines.map((line, lineNumber) => {
-        let processedLine = escapeHTML(line); // Start with escaped content
-        patterns.forEach((pattern) => {
-            const matches = [...line.matchAll(pattern.regex)];
-            matches.forEach((match) => {
-                const matchText = match[0];
-                const escapedMatchText = escapeHTML(matchText);
-                const highlightSpan = `<span class="highlight-${pattern.severity}">${escapedMatchText}</span>`;
-
-                // Replace the match in the line with the highlighted span
-                processedLine = processedLine.replace(escapedMatchText, highlightSpan);
-
-                // Store vulnerability details
-                vulnerabilities.push({
-                    matchText,
-                    message: pattern.message,
-                    severity: pattern.severity,
-                    line: lineNumber + 1,
-                });
-            });
+// Analyze Code
+function analyzeCode(content) {
+  const lines = content.split('\n');
+  const vulnerabilities = [];
+  const highlightedLines = lines.map((line, lineNumber) => {
+    let processedLine = escapeHTML(line);
+    vulnerabilityPatterns.forEach((pattern) => {
+      const matches = [...line.matchAll(pattern.regex)];
+      matches.forEach((match) => {
+        vulnerabilities.push({
+          message: pattern.message,
+          severity: pattern.severity,
+          line: lineNumber + 1,
+          match: match[0],
         });
-        return processedLine; // Return the highlighted line
+        processedLine = processedLine.replace(
+          match[0],
+          `<span class="highlight-${pattern.severity}">${match[0]}</span>`
+        );
+      });
     });
-
-    return { vulnerabilities, formattedLines };
+    return `<span class="line-number">${lineNumber + 1}</span>${processedLine}`;
+  });
+  return { vulnerabilities, highlightedLines };
 }
 
-// Reset the analyzer to its default state
-function resetAnalyzer() {
-    fileName.textContent = 'No file chosen';
-    vulnerabilitiesOutput.textContent = 'No vulnerabilities detected.';
-    codeDisplay.innerHTML = '<p>Code will appear here.</p>'; // Reset display
-    removeScriptButton.hidden = true;
-    fileInput.value = '';
+// Render Vulnerabilities
+function renderVulnerabilities(vulnerabilities) {
+  vulnerabilitiesOutput.innerHTML = vulnerabilities
+    .map(
+      (vuln) =>
+        `<p><span class="severity-indicator ${vuln.severity}"></span> ${vuln.message} (Line: ${vuln.line})</p>`
+    )
+    .join('');
 }
 
-// Handle file uploads
+// Render Code
+function renderCode(lines) {
+  codeDisplay.innerHTML = lines.join('<br>');
+}
+
+// Reset UI
+function resetUI() {
+  fileName.textContent = 'No file chosen';
+  vulnerabilitiesOutput.innerHTML = '<p>No vulnerabilities detected.</p>';
+  codeDisplay.innerHTML = '<p>Code will appear here.</p>';
+  removeScriptButton.hidden = true;
+}
+
+// Handle File Upload
 fileInput.addEventListener('change', async (event) => {
-    const file = event.target.files[0];
-    if (file) {
-        fileName.textContent = file.name;
-        removeScriptButton.hidden = false;
-
-        // Read the file content
-        const content = await file.text();
-
-        // Process the code for vulnerabilities
-        const { vulnerabilities, formattedLines } = processCode(content, vulnerabilityPatterns);
-
-        // Render vulnerabilities with severity indicators
-        if (vulnerabilities.length > 0) {
-            vulnerabilitiesOutput.innerHTML = formatVulnerabilityOutput(vulnerabilities);
-        } else {
-            vulnerabilitiesOutput.textContent = 'No vulnerabilities detected.';
-        }
-
-        // Render the formatted code in the Code Display section
-        codeDisplay.innerHTML = formattedLines
-            .map((line, index) => `<div class="code-line"><span class="line-number">${index + 1}</span> ${line}</div>`)
-            .join('');
-    } else {
-        resetAnalyzer();
-    }
+  const file = event.target.files[0];
+  if (file) {
+    fileName.textContent = file.name;
+    const content = await file.text();
+    const { vulnerabilities, highlightedLines } = analyzeCode(content);
+    renderVulnerabilities(vulnerabilities);
+    renderCode(highlightedLines);
+    removeScriptButton.hidden = false;
+  }
 });
 
-// Handle script removal
-removeScriptButton.addEventListener('click', () => resetAnalyzer());
+// Handle Reset
+removeScriptButton.addEventListener('click', resetUI);
