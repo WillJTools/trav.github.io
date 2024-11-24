@@ -66,16 +66,35 @@ function escapeHTML(html) {
         .replace(/'/g, '&#039;');
 }
 
-// Highlight matched code based on severity
-function highlightCode(content, patterns) {
-    let highlightedContent = escapeHTML(content); // Escape HTML to avoid rendering issues
+// Analyze code and capture vulnerabilities
+function analyzeCode(content, patterns) {
+    const results = []; // Store details of vulnerabilities
+    let highlightedContent = escapeHTML(content); // Start with escaped content
+
+    // Iterate through each pattern
     patterns.forEach((pattern) => {
-        highlightedContent = highlightedContent.replace(
-            pattern.regex,
-            (match) => `<span class="highlight-${pattern.severity}">${match}</span>`
-        );
+        const matches = [...highlightedContent.matchAll(pattern.regex)];
+        matches.forEach((match) => {
+            const matchText = match[0]; // Matched text
+            const matchIndex = match.index; // Index of the match
+
+            // Add details to the results array
+            results.push({
+                matchText,
+                message: pattern.message,
+                severity: pattern.severity,
+                position: matchIndex,
+            });
+
+            // Highlight the match in the code
+            highlightedContent = highlightedContent.replace(
+                matchText,
+                `<span class="highlight-${pattern.severity}">${matchText}</span>`
+            );
+        });
     });
-    return highlightedContent;
+
+    return { results, highlightedContent };
 }
 
 // Reset the analyzer to its default state
@@ -98,24 +117,24 @@ fileInput.addEventListener('change', async (event) => {
         const content = await file.text();
 
         // Analyze content for vulnerabilities
-        vulnerabilitiesOutput.textContent = 'Analyzing...';
-        const findings = [];
-        vulnerabilityPatterns.forEach((pattern) => {
-            if (pattern.regex.test(content)) {
-                findings.push(pattern.message);
-            }
-        });
+        const { results, highlightedContent } = analyzeCode(content, vulnerabilityPatterns);
 
         // Display vulnerabilities
-        if (findings.length > 0) {
-            vulnerabilitiesOutput.innerHTML = findings.map((f) => `&#8226; ${f}`).join('<br>');
+        if (results.length > 0) {
+            vulnerabilitiesOutput.innerHTML = results
+                .map(
+                    (result) =>
+                        `&#8226; ${result.message} (Vulnerable code: "<code>${escapeHTML(
+                            result.matchText
+                        )}</code>")`
+                )
+                .join('<br>');
         } else {
             vulnerabilitiesOutput.textContent = 'No vulnerabilities detected.';
         }
 
-        // Highlight the code and display it
-        const highlightedCode = highlightCode(content, vulnerabilityPatterns);
-        codeDisplay.innerHTML = `<pre>${highlightedCode}</pre>`; // Wrap in <pre> for formatting
+        // Display highlighted code in the Code Display section
+        codeDisplay.innerHTML = `<pre>${highlightedContent}</pre>`;
     } else {
         resetAnalyzer();
     }
