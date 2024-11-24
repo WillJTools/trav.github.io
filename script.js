@@ -87,9 +87,10 @@ function analyzeCode(content, patterns) {
             });
 
             // Highlight the match in the code
+            const escapedMatchText = escapeHTML(matchText); // Ensure matched text is escaped
             highlightedContent = highlightedContent.replace(
-                matchText,
-                `<span class="highlight-${pattern.severity}">${matchText}</span>`
+                escapedMatchText,
+                `<span class="highlight-${pattern.severity}">${escapedMatchText}</span>`
             );
         });
     });
@@ -134,7 +135,7 @@ fileInput.addEventListener('change', async (event) => {
         }
 
         // Display highlighted code in the Code Display section
-        codeDisplay.innerHTML = `<pre>${highlightedContent}</pre>`;
+        codeDisplay.innerHTML = `<pre><code>${highlightedContent}</code></pre>`; // Wrap in <pre> and <code>
     } else {
         resetAnalyzer();
     }
